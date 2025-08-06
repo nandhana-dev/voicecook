@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:voicecook/models/recipe.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:io';
+import '../models/recipe_hive.dart';
+import 'creatorpage.dart';
+import 'package:hive/hive.dart';
 
 
 class RecipeDetailPage extends StatefulWidget {
-  final Recipe recipe;
+  final HiveRecipe recipe;
+
 
   const RecipeDetailPage({super.key, required this.recipe});
 
@@ -14,23 +17,33 @@ class RecipeDetailPage extends StatefulWidget {
 }
 
 class _RecipeDetailPageState extends State<RecipeDetailPage> {
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  final AudioPlayer player = AudioPlayer();
   bool isPlaying = false;
 
-  void _togglePlayPause() async {
-    if (isPlaying) {
-      await _audioPlayer.pause();
+  void _playAudio(String path) async {
+    if (await File(path).exists()) {
+      await player.play(DeviceFileSource(path));
+      print("🎵 Playing audio from: $path");
     } else {
-      await _audioPlayer.play(DeviceFileSource(widget.recipe.audioPath));
+      print("❌ Audio file not found at: $path");
     }
-    setState(() => isPlaying = !isPlaying);
   }
 
   @override
   void dispose() {
-    _audioPlayer.dispose();
+    player.dispose();
     super.dispose();
   }
+
+
+  @override
+  void initState() {
+    super.initState();
+    print("🎧 Received audio path: ${widget.recipe.audioPath}");
+  }
+
+  
+
 
   @override
   Widget build(BuildContext context) {
@@ -67,22 +80,79 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                IconButton(
-                  icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
-                  onPressed: _togglePlayPause,
+                ElevatedButton.icon(
+                  onPressed: () => _playAudio(widget.recipe.audioPath),
+                  icon: Icon(Icons.play_arrow),
+                  label: Text(isPlaying ? "Pause" : "Play Audio"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepOrange,
+                    foregroundColor: Colors.white,
+                  ),
                 ),
+
+
                 IconButton(
                   icon: const Icon(Icons.favorite_border),
                   onPressed: () {},
                 ),
                 IconButton(
-                  icon: const Icon(Icons.bookmark_border),
-                  onPressed: () {},
+                  icon: Icon(Icons.bookmark_add_outlined, color: Colors.deepOrange),
+                  onPressed: () async {
+                    final savedBox = Hive.box<HiveRecipe>('saved_recipes');
+
+                    // ✅ Check if this recipe is already saved (by title & creator)
+                    final alreadySaved = savedBox.values.any((r) =>
+                      r.title == widget.recipe.title &&
+                      r.creatorId == widget.recipe.creatorId);
+
+                    if (alreadySaved) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Already saved!')),
+                      );
+                      return;
+                    }
+
+                    // ✅ Save only if not already present
+                    await savedBox.add(HiveRecipe(
+                      title: widget.recipe.title,
+                      ingredients: widget.recipe.ingredients,
+                      imagePath: widget.recipe.imagePath,
+                      audioPath: widget.recipe.audioPath,
+                      creatorId: widget.recipe.creatorId,
+                      creatorName: widget.recipe.creatorName,
+                      creatorProfilePicPath: widget.recipe.creatorProfilePicPath,
+                      creatorContact: widget.recipe.creatorContact,
+                      creatorUPI: widget.recipe.creatorUPI,
+                    ));
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Recipe saved!')),
+                    );
+                  },
                 ),
-                IconButton(
-                  icon: const CircleAvatar(radius: 14, backgroundImage: AssetImage('assets/creator.png')),
-                  onPressed: () {},
+
+
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CreatorPage(
+                          creatorId: recipe.creatorId,
+                          creatorName: recipe.creatorName,
+                          creatorProfilePicPath: recipe.creatorProfilePicPath,
+                          creatorContact: recipe.creatorContact,
+                          creatorUpi: recipe.creatorUPI,
+                        ),
+                      ),
+                    );
+                  },
+                  child: CircleAvatar(
+                    radius: 20,
+                    backgroundImage: FileImage(File(recipe.creatorProfilePicPath)),
+                  ),
                 ),
+
               ],
             ),
             const SizedBox(height: 12),
@@ -107,14 +177,14 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                 ),
                 child: SingleChildScrollView(
                   child: Text(
-                    recipe.ingredients,
+                    recipe.ingredients.join(', '),
                     style: const TextStyle(fontSize: 16),
                   ),
                 ),
               ),
             ),
             const SizedBox(height: 12),
-            // TODO: Add next recipe section here later
+           
           ],
         ),
       ),

@@ -7,8 +7,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
-import '../models/recipe.dart';
-import '../database/db_helper.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import '../models/recipe_hive.dart';
+import '../del/recipe_notifier.dart';
+
 
 
 class AddRecipeScreen extends StatefulWidget {
@@ -19,6 +21,10 @@ class AddRecipeScreen extends StatefulWidget {
 }
 
 class _AddRecipeScreenState extends State<AddRecipeScreen> {
+  String selectedImagePath = '';
+  String recordedAudioPath = '';
+  String selectedProfilePicPath = '';
+
   final TextEditingController _ingredientController = TextEditingController();
   final TextEditingController _titleController = TextEditingController();
   final FlutterSoundRecorder _recorder = FlutterSoundRecorder();
@@ -29,6 +35,11 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
 
   bool _isRecorderInitialized = false;
 
+
+  Future<bool> requestMicPermission() async {
+    var status = await Permission.microphone.request();
+    return status == PermissionStatus.granted;
+  }
 
   
 void _showRecordingBottomSheet(BuildContext context) async {
@@ -199,13 +210,28 @@ void _showRecordingBottomSheet(BuildContext context) async {
 
 
   Future<void> _stopRecording() async {
-    await _recorder.stopRecorder();
-    setState(() {
-      _isRecording = false;
-    });
-    Fluttertoast.showToast(msg: "Audio saved to $_audioFilePath");
+  final path = await _recorder.stopRecorder();
 
+  setState(() {
+    _isRecording = false;
+  });
+
+  if (path != null) {
+    final appDir = await getApplicationDocumentsDirectory();
+    final fileName = "audio_${DateTime.now().millisecondsSinceEpoch}.aac";
+    final savedAudio = await File(path).copy('${appDir.path}/$fileName');
+
+    setState(() {
+      _audioFilePath = savedAudio.path;  // Update your stored path
+    });
+    print("✅ Final saved audio path: $_audioFilePath"); 
+
+    Fluttertoast.showToast(msg: "✅ Audio saved to $_audioFilePath");
+  } else {
+    Fluttertoast.showToast(msg: "❌ Failed to save audio.");
   }
+}
+
 
   
 
@@ -220,20 +246,25 @@ void _showRecordingBottomSheet(BuildContext context) async {
   }
 }
 
-Future<bool> requestMicPermission() async {
-  PermissionStatus status = await Permission.microphone.request();
-  return status.isGranted;
-}
+
 
 Future<void> _pickImage(ImageSource source) async {
   final pickedFile = await _picker.pickImage(source: source);
 
   if (pickedFile != null) {
+    final appDir = await getApplicationDocumentsDirectory(); // app's private folder
+    final fileName = DateTime.now().millisecondsSinceEpoch.toString(); // unique name
+    final savedImage = await File(pickedFile.path).copy('${appDir.path}/$fileName.jpg');
+
     setState(() {
-      _imageFile = File(pickedFile.path);
+      _imageFile = savedImage;
+      selectedImagePath = savedImage.path; // <- this is what gets saved in Hive
     });
+
+    print("✅ Copied image to: ${savedImage.path}");
   }
 }
+
 
 
 
@@ -253,17 +284,31 @@ Future<void> _saveRecipe() async {
     return;
   }
 
-  final recipe = Recipe(
-    title: title,
-    ingredients: ingredients,
-    imagePath: _imageFile?.path ?? '',
-    audioPath: _audioFilePath ?? '', 
-    creatorId: 'user123', // required
-  );
 
-  await DatabaseHelper().insertRecipe(recipe);
-  Fluttertoast.showToast(msg: "Recipe saved!");
-  Navigator.pop(context);
+  final enteredIngredients = ingredients.split(',').map((e) => e.trim()).toList();
+  final recipeTitle = title; 
+
+  final recipe = HiveRecipe(
+  title: recipeTitle,
+  ingredients: enteredIngredients,
+  imagePath: selectedImagePath,
+  audioPath: _audioFilePath!,
+  creatorId: "housewife123", // Or however you're generating/storing this
+
+  // ✅ Add these:
+  creatorName: "Lakshmi", // Or input from user
+  creatorProfilePicPath: selectedProfilePicPath,
+  creatorContact: "9876543210",
+  creatorUPI: "lakshmi@okhdfcbank",
+);
+
+final recipeBox = Hive.box<HiveRecipe>('recipes');
+await recipeBox.add(recipe);
+
+recipeListNotifier.value = recipeBox.values.toList();  // ✅ update HomeScreen
+
+Fluttertoast.showToast(msg: "Recipe saved!");
+Navigator.pop(context);
 
   
 }

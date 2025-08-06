@@ -2,32 +2,47 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:voicecook/screens/add_recipe_screen.dart';
-import 'package:voicecook/database/db_helper.dart';
-import 'package:voicecook/models/recipe.dart';
 import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'screens/recipe_detail.dart';
 import 'screens/creatorpage.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'models/recipe_hive.dart';
+import 'del/recipe_notifier.dart';
+import 'screens/saved_recipes_page.dart';
 
 
 
 
-void main() => runApp(VoiceCookApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Required before Hive
+  await Hive.initFlutter();
+  Hive.registerAdapter(HiveRecipeAdapter());
+   
+  
+  await Hive.openBox<HiveRecipe>('recipes');
+  await Hive.openBox<HiveRecipe>('saved_recipes');
+ 
+
+  runApp(const VoiceCookApp()); // Now run the app
+}
+
 
 class VoiceCookApp extends StatelessWidget {
   const VoiceCookApp({Key? key}) : super(key: key);
 
-  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'VoiceCook',
       theme: ThemeData(primarySwatch: Colors.orange),
-      home: HomeScreen(), // ✅ Start at your HomeScreen
+      home: HomeScreen(),
     );
   }
 }
+
 
 
 class HomeScreen extends StatefulWidget {
@@ -39,13 +54,17 @@ class _HomeScreenState extends State<HomeScreen> {
   static const platform = MethodChannel('voicecook.speech.recognizer');
   final TextEditingController _searchController = TextEditingController();
   
-  List<Recipe> _recipes = [];
-
   @override
   void initState() {
     super.initState();
+
     _loadRecipes();
+
+    recipeListNotifier.addListener(() {
+      setState(() {}); // Rebuild UI when recipe list changes
+    });
   }
+
 
 
    @override
@@ -55,12 +74,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadRecipes() async {
-  final db = DatabaseHelper();
-  final recipes = await db.getRecipes();
-  setState(() {
-    _recipes = recipes;
-  });
-}
+    final box = Hive.box<HiveRecipe>('recipes');
+    recipeListNotifier.value = box.values.toList();  // ✅ global update
+  }
+
+
+
 
  void _playAudio(String path) async {
     final player = AudioPlayer();
@@ -87,6 +106,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print("📦 HomeScreen recipes count: ${recipeListNotifier.value.length}");
+
     return Scaffold(
       backgroundColor: Colors.orange[50],
       body: SafeArea(
@@ -166,11 +187,19 @@ class _HomeScreenState extends State<HomeScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => CreatorPage(
-                            creatorId: "user123",
-                            currentUserId: "user123",
+                            creatorId: 'housewife123',
+                            creatorName: 'Lakshmi',
+                            creatorProfilePicPath: 'assets/images/default.png', // or any dummy asset
+                            creatorContact: '9876543210',
+                            creatorUpi: 'lakshmi@okaxis',
                           ),
+
                         ),
-                      );
+                      ).then((shouldRefresh) {
+                        if (shouldRefresh == true) {
+                          _loadRecipes();
+                        }
+                      });
                     },
                     child: Icon(Icons.account_circle, size: 30, color: Colors.green[700]),
                   ),
@@ -181,19 +210,21 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(height: 12),
 
             // Display saved recipes
+
+            
             Expanded(
-              child: _recipes.isEmpty
-                ? Center(
-                    child: Text(
-                      'No recipes yet!',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: _recipes.length,
+              child: ValueListenableBuilder<List<HiveRecipe>>(
+                valueListenable: recipeListNotifier,
+                builder: (context, recipes, _) {
+                  if (recipes.isEmpty) {
+                    return Center(child: Text('No recipes yet!'));
+                  }
+
+                  return ListView.builder(
+                    itemCount: recipes.length,
                     itemBuilder: (context, index) {
-                      final recipe = _recipes[index];
-                       return GestureDetector(
+                      final recipe = recipes[index];
+                      return GestureDetector(
                         onTap: () {
                           Navigator.push(
                             context,
@@ -207,31 +238,29 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: ListTile(
                             contentPadding: EdgeInsets.all(8),
                             leading: recipe.imagePath.isNotEmpty
-                              ? Image.file(
-                                File(recipe.imagePath),
-                                width: 60,
-                                height: 60,
-                                fit: BoxFit.cover,
-                              )
-                            : const Icon(Icons.image_not_supported),
-                          title: Text(recipe.title),
-                          subtitle: Text(
-                            recipe.ingredients,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis),
-                          trailing: Icon(Icons.arrow_forward_ios, size: 16),
-
-
+                                ? Image.file(
+                                    File(recipe.imagePath),
+                                    width: 60,
+                                    height: 60,
+                                    fit: BoxFit.cover,
+                                  )
+                                : const Icon(Icons.image_not_supported),
+                            title: Text(recipe.title),
+                            subtitle: Text(
+                              recipe.ingredients.join(', '),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            trailing: Icon(Icons.arrow_forward_ios, size: 16),
                           ),
                         ),
                       );
                     },
-                ),
+                  );
+                },
+              ),
             ),
 
-                       
-
-                      
 
 
             // Bottom Section: Home | Made with love by + Creator | Saved
@@ -285,13 +314,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
 
                   // Right: Saved list
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(Icons.bookmark, color: Colors.deepOrange),
-                      Text("Saved", style: TextStyle(fontSize: 12, color: Colors.deepOrange)),
-                    ],
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const SavedRecipesPage()),
+                      );
+                    },
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.bookmark, color: Colors.deepOrange),
+                        Text("Saved", style: TextStyle(fontSize: 12, color: Colors.deepOrange)),
+                      ],
+                    ),
                   ),
+
                 ],
               ),
             ),
