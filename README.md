@@ -45,7 +45,7 @@ VoiceCook is a Flutter app that helps people cook faster — search by voice, up
 ---
 
 ## 🚀 Download & Try
-APK (v1): [Download VoiceCook v1 APK](APK_LINK_HERE)
+APK (v1): [Download VoiceCook v1 APK](https://github.com/nandhana-dev/voicecook/releases/download/v1.0/voicecookv1.apk)
 
 ---
 
@@ -63,6 +63,7 @@ This project is my personal work — please contact me before reusing or republi
 ---
 
 > VoiceCook isn’t just a recipe app — it’s a shortcut to flavor, and the kitchen’s new best friend. 😉
+
 
 
 
