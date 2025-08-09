@@ -50,8 +50,20 @@ APK (v1): [Download VoiceCook v1 APK](https://github.com/nandhana-dev/voicecook/
 ---
 
 ## 📜 License & Ownership
-Copyright © 2025 Nandhana.  
-This project is my personal work — please contact me before reusing or republishing any part of this code or app.
+
+© 2025 Nandhana. All rights reserved.  
+This project, including all source code, assets, and documentation, is my original work.  
+Unauthorized copying, distribution, or reuse is prohibited.  
+Please reach out to: ✉️ nandhanaprabhar231@gmail.com  before republishing or using any part of this project.
+
+
+---
+## 📌 Notes
+
+- This project is developed solely by me, Nandhana.  
+- For personal use, learning, and review only.  
+- Please do **not** redistribute, modify, or reuse any part of this project without my explicit permission.  
+- If you want to collaborate or discuss usage rights, feel free to contact me at [your email].
 
 ---
 
@@ -63,6 +75,7 @@ This project is my personal work — please contact me before reusing or republi
 ---
 
 > VoiceCook isn’t just a recipe app — it’s a shortcut to flavor, and the kitchen’s new best friend. 😉
+
 
 
 
