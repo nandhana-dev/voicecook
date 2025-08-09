@@ -63,7 +63,7 @@ Please reach out to: ✉️ nandhanaprabhar231@gmail.com  before republishing or
 - This project is developed solely by me, Nandhana.  
 - For personal use, learning, and review only.  
 - Please do **not** redistribute, modify, or reuse any part of this project without my explicit permission.  
-- If you want to collaborate or discuss usage rights, feel free to contact me at [your email].
+- If you want to collaborate or discuss usage rights, feel free to contact me at [nandhanaprabhakar231@gmail.com].
 
 ---
 
@@ -75,6 +75,7 @@ Please reach out to: ✉️ nandhanaprabhar231@gmail.com  before republishing or
 ---
 
 > VoiceCook isn’t just a recipe app — it’s a shortcut to flavor, and the kitchen’s new best friend. 😉
+
 
 
 
