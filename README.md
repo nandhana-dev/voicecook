@@ -38,7 +38,7 @@ VoiceCook is a high-performance Flutter application designed to bridge the gap b
 
 ## 🛡️ License
 **Copyright © 2025 Nandhana.** All rights reserved.  
-Proprietary work. Unauthorized copying or distribution is prohibited. [Inquiries](mailto:nandhanaprabhar231@gmail.com).
+Proprietary work. Unauthorized copying or distribution is prohibited. Inquiries: nandhanaprabhar231@gmail.com
 
 ---
 
@@ -61,3 +61,4 @@ flutter pub get
 
 # Run the app
 flutter run
+
