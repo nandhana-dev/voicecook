@@ -1,83 +1,63 @@
-# 🍳 VoiceCook v1
+# 🍳 VoiceCook 
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white" />
+  <img src="https://img.shields.io/badge/Hive-FFC107?style=for-the-badge&logo=hive&logoColor=black" />
+</p>
 
 **Quick Recipes. Local Flavors. Zero Hassle.**
 
-VoiceCook is a Flutter app that helps people cook faster — search by voice, upload recipes, and get clear ingredient + step info without long videos.
+VoiceCook is a high-performance Flutter application designed to bridge the gap between complex video tutorials and efficient cooking. It leverages voice-guided search and a "no-fluff" UI to provide ingredients and steps instantly.
 
 ---
 
-## ✨ Why VoiceCook?
-- **Save Time** — Skip the 40-minute video and get the recipe in minutes.  
-- **Clear & Fast** — Ingredients + steps upfront, no fluff.  
-- **Voice Guidance** — Even complete beginners can follow along.  
-- **Explore Local Recipes** — Discover native dishes in minutes.  
-- **Easy Upload** — Share your recipe in a few taps.  
-- **Save for Later** — Bookmark recipes for future cooking.
+## ✨ Key Features
+
+- 🎙️ **Voice-Driven Experience** — Hands-free navigation designed for busy kitchens.
+- ⚡ **Instant Access** — Skips long video intros; get straight to the ingredients and steps.
+- 🌍 **Local Gastronomy** — Specialized discovery of native and regional dishes.
+- 📤 **Recipe Contribution** — Seamless upload flow for creators to share their culinary magic.
+- 💾 **Offline Ready** — Powered by **Hive** for fast local storage and bookmarking.
 
 ---
 
+## 📸 App Showcase
 
-## 📸 App Tour
-- **Home (voice search + recipes)**  
-  ![](home.jpg)
-
-- **Recipe detail (bookmark/save)**  
-  ![](recipe-detail.jpg)
-
-- **Saved recipes list**  
-  ![](saved.jpg)
-
-- **Upload a recipe**  
-  ![](upload-recipe.jpg)
-
-- **Voice search (speech → text)**  
-  ![](voice-search.jpg)
-
-- **Creator profile (creator info & gifts)**  
-  ![](creator-pg.jpg)
+<p align="center">
+  <img src="app-tour.jpeg" width="350" alt="VoiceCook Screenshot" />
+</p>
 
 ---
 
-## 🛠 Tech
-- Flutter (Dart)  
-- Hive (local storage)
+## 🔮 Future Plans
+- [ ] **Monetization Engine** — Implement pay-per-audio-play for content creators.
+- [ ] **Engagement Analytics** — Social metrics including likes, shares, and creator revenue dashboards.
+- [ ] **Community Hub** — Real-time chat functionality between users and culinary creators.
 
 ---
 
-## 🚀 Download & Try
-APK (v1): [Download VoiceCook v1 APK](https://github.com/nandhana-dev/voicecook/releases/download/v1.0/voicecookv1.apk)
+## 🛡️ License
+**Copyright © 2025 Nandhana.** All rights reserved.  
+Proprietary work. Unauthorized copying or distribution is prohibited. [Inquiries](mailto:nandhanaprabhar231@gmail.com).
 
 ---
 
-## 📜 License & Ownership
+## 🚀 Technical Setup
 
-© 2025 Nandhana. All rights reserved.  
-This project, including all source code, assets, and documentation, is my original work.  
-Unauthorized copying, distribution, or reuse is prohibited.  
-Please reach out to: ✉️ nandhanaprabhar231@gmail.com  before republishing or using any part of this project.
+### Prerequisites
+* Flutter SDK (Latest Version)
+* Dart SDK
 
+### Installation
+```bash
+# Clone the repository
+git clone [https://github.com/nandhana-dev/voicecook.git](https://github.com/nandhana-dev/voicecook.git)
 
----
-## 📌 Notes
+# Navigate to project folder
+cd voicecook
 
-- This project is developed solely by me, Nandhana.  
-- For personal use, learning, and review only.  
-- Please do **not** redistribute, modify, or reuse any part of this project without my explicit permission.  
-- If you want to collaborate or discuss usage rights, feel free to contact me at [nandhanaprabhakar231@gmail.com].
+# Install Flutter dependencies
+flutter pub get
 
----
-
-## 💡 Future Plans
-- Monetization for creators (paid per audio play)  
-- Likes, engagement metrics & creator revenue share  
-- Live chat between users and creators
-
----
-
-> VoiceCook isn’t just a recipe app — it’s a shortcut to flavor, and the kitchen’s new best friend. 😉
-
-
-
-
-
-
+# Run the app
+flutter run
